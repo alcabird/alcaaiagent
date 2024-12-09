@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALCA - Crypto AI Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --surface: #1e1e2e;
+            --background: #0f0f17;
+            --text: #ffffff;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            display: grid;
+            grid-template-rows: auto 1fr;
+        }
+
+        .header {
+            background: rgba(37, 99, 235, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .mascot {
+            width: 40px;
+            height: 40px;
+            filter: drop-shadow(0 0 10px rgba(37, 99, 235, 0.3));
+        }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(to right, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .main {
+            display: grid;
+            grid-template-rows: 1fr auto;
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 1rem;
+            gap: 1rem;
+            height: calc(100vh - 73px);
+        }
+
+        .chat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .message {
+            display: flex;
+            gap: 1rem;
+            opacity: 0;
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .content {
+            background: rgba(37, 99, 235, 0.1);
+            padding: 1rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            max-width: 80%;
+        }
+
+        .user .content {
+            background: var(--primary);
+            margin-left: auto;
+        }
+
+        .input-area {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .suggestions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .suggestion {
+            background: rgba(37, 99, 235, 0.1);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .suggestion:hover {
+            background: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .main {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .content {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <svg class="mascot" viewBox="0 0 100 100">
+                <path d="M50 15 Q70 15 80 35 Q85 45 85 55 Q85 70 70 80 Q60 85 50 85 Q40 85 30 80 Q15 70 15 55 Q15 45 20 35 Q30 15 50 15" 
+                      fill="#000000" />
+                <path d="M50 45 Q60 45 65 60 Q67 70 65 80 Q60 85 50 85 Q40 85 35 80 Q33 70 35 60 Q40 45 50 45" 
+                      fill="#ffffff" />
+                <path d="M35 40 Q40 35 45 40" stroke="#ffffff" stroke-width="3" fill="none" />
+                <path d="M65 40 Q60 35 55 40" stroke="#ffffff" stroke-width="3" fill="none" />
+                <path d="M48 43 L50 46 L52 43" stroke="#ffffff" stroke-width="1" fill="none" />
+            </svg>
+            <span class="brand">ALCA</span>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="chat" id="chatBox">
+            <div class="message">
+                <div class="avatar">
+                    <svg viewBox="0 0 100 100">
+                        <!-- Mascot SVG -->
+                        <path d="M50 15 Q70 15 80 35 Q85 45 85 55 Q85 70 70 80 Q60 85 50 85 Q40 85 30 80 Q15 70 15 55 Q15 45 20 35 Q30 15 50 15" 
+                              fill="#000000" />
+                        <path d="M50 45 Q60 45 65 60 Q67 70 65 80 Q60 85 50 85 Q40 85 35 80 Q33 70 35 60 Q40 45 50 45" 
+                              fill="#ffffff" />
+                        <path d="M35 40 Q40 35 45 40" stroke="#ffffff" stroke-width="3" fill="none" />
+                        <path d="M65 40 Q60 35 55 40" stroke="#ffffff" stroke-width="3" fill="none" />
+                        <path d="M48 43 L50 46 L52 43" stroke="#ffffff" stroke-width="1" fill="none" />
+                    </svg>
+                </div>
+                <div class="content">
+                    Hi! I'm ALCA, your crypto assistant. Ask me anything about cryptocurrency! Here are some suggestions:
+                    <div class="suggestions">
+                        <span class="suggestion">What is Bitcoin?</span>
+                        <span class="suggestion">Explain blockchain</span>
+                        <span class="suggestion">What is DeFi?</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Ask about crypto...">
+            <button onclick="sendMessage()">
+                Send
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"/>
+                </svg>
+            </button>
+        </div>
+    </main>
+
+    <script>
+        const responses = {
+            'bitcoin': 'Bitcoin is the first and most well-known cryptocurrency, created in 2009 by an anonymous person or group using the name Satoshi Nakamoto. It\'s a decentralized digital currency that enables peer-to-peer transactions without the need for intermediaries.',
+            'blockchain': 'Blockchain is a distributed ledger technology that records transactions across a network of computers. It\'s the underlying technology behind cryptocurrencies, providing security, transparency, and immutability to transactions.',
+            'defi': 'DeFi (Decentralized Finance) refers to financial services built on blockchain technology that operate without traditional intermediaries like banks. This includes lending, borrowing, trading, and earning interest on crypto assets.',
+            'ethereum': 'Ethereum is a blockchain platform that enables the creation of smart contracts and decentralized applications (dApps). Its native cryptocurrency is called Ether (ETH), and it\'s the second-largest cryptocurrency by market cap.',
+            'mining': 'Cryptocurrency mining is the process of validating transactions and adding them to the blockchain. Miners use powerful computers to solve complex mathematical problems, and are rewarded with new coins for their work.',
+            'wallet': 'A cryptocurrency wallet is a digital tool that allows you to store, send, and receive cryptocurrencies. It can be software-based (hot wallet) or hardware-based (cold wallet) and contains your private keys.',
+            'nft': 'NFTs (Non-Fungible Tokens) are unique digital assets stored on a blockchain. They can represent ownership of digital art, music, videos, virtual real estate, and more. Each NFT has a unique identifier that proves its authenticity and ownership.',
+            'smart contract': 'Smart contracts are self-executing contracts with the terms directly written into code. They automatically execute when predetermined conditions are met, enabling trustless transactions and automated processes on blockchain networks.',
+            'altcoin': 'Altcoins are any cryptocurrencies other than Bitcoin. Examples include Ethereum, Binance Coin, and Cardano. Each typically offers different features or improvements over Bitcoin\'s original design.',
+            'staking': 'Staking is a way to earn rewards for holding certain cryptocurrencies. By "staking" your coins, you help secure the network and validate transactions, receiving new coins as a reward.',
+        };
+
+        function addMessage(content, isUser = false) {
+            const chatBox = document.getElementById('chatBox');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : ''}`;
+            
+            if (!isUser) {
+                messageDiv.innerHTML = `
+                    <div class="avatar">
+                        <svg viewBox="0 0 100 100">
+                            <path d="M50 15 Q70 15 80 35 Q85 45 85 55 Q85 70 70 80 Q60 85 50 85 Q40 85 30 80 Q15 70 15 55 Q15 45 20 35 Q30 15 50 15" 
+                                  fill="#000000" />
+                            <path d="M50 45 Q60 45 65 60 Q67 70 65 80 Q60 85 50 85 Q40 85 35 80 Q33 70 35 60 Q40 45 50 45" 
+                                  fill="#ffffff" />
+                            <path d="M35 40 Q40 35 45 40" stroke="#ffffff" stroke-width="3" fill="none" />
+                            <path d="M65 40 Q60 35 55 40" stroke="#ffffff" stroke-width="3" fill="none" />
+                            <path d="M48 43 L50 46 L52 43" stroke="#ffffff" stroke-width="1" fill="none" />
+                        </svg>
+                    </div>
+                `;
+            }
+            
+            messageDiv.innerHTML += `<div class="content">${content}</div>`;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function getResponse(input) {
+            input = input.toLowerCase();
+            let response = "I'm not sure about that. Try asking about Bitcoin, blockchain, DeFi, mining, wallets, NFTs, smart contracts, altcoins, or staking!";
+            
+            for (const [key, value] of Object.entries(responses)) {
+                if (input.includes(key)) {
+                    response = value;
+                    break;
+                }
+            }
+            
+            return response;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                addMessage(message, true);
+                setTimeout(() => {
+                    addMessage(getResponse(message), false);
+                }, 500);
+                input.value = '';
+            }
+        }
+
+        document.getElementById('userInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        document.querySelectorAll('.suggestion').forEach(suggestion => {
+            suggestion.addEventListener('click', () => {
+                const text = suggestion.textContent;
+                document.getElementById('userInput').value = text;
+                sendMessage();
+            });
+        });
+    </script>
+</body>
+</html>
